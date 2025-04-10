@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <title></title>
+  <!-- Подключаем Tailwind CSS и Font Awesome через CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto space-y-6">
+    <!-- Шапка -->
+    <div class="bg-white rounded-lg p-6 shadow-md">
+      <h1 class="text-3xl font-bold text-gray-800 mb-2">Демонстрация работы с Cookies</h1>
+      <div class="flex items-center space-x-4 text-gray-600">
+        <i class="fas fa-info-circle"></i>
+        <h2>Текущий домен: <span id="currentHost" class="font-mono text-blue-600 text-2xl"></span></h2>
+        <h2>Текущий путь: <span id="currentPath" class="font-mono text-blue-600 text-2xl"></span></h2>
+      </div>
+    </div>
+
+    <!-- Блок текущих cookies -->
+    <div class="bg-white rounded-lg p-6 shadow-md">
+      <h2 class="text-xl font-semibold mb-4 flex items-center space-x-2">
+        <i class="fas fa-cookie-bite text-blue-500"></i>
+        <span>Текущие Cookies</span>
+      </h2>
+      <div id="cookiesContainer" class="bg-gray-50 p-4 rounded">
+        <pre class="text-sm font-mono" id="cookiesRaw"></pre>
+      </div>
+    </div>
+
+    <!-- Блок управления cookies -->
+    <div class="bg-white rounded-lg p-6 shadow-md">
+      <h2 class="text-xl font-semibold mb-4 flex items-center space-x-2">
+        <i class="fas fa-tools text-green-500"></i>
+        <span>Действия с Cookies</span>
+      </h2>
+      <div class="grid grid-cols-1 gap-4">
+        <!-- Кнопки обернуты в div с relative -->
+        <div class="relative">
+          <button data-action="hostOnly" class="action-btn bg-green-100 hover:bg-green-200">
+            Установить Host-only
+          </button>
+        </div>
+        <div class="relative">
+          <button data-action="domain" class="action-btn bg-blue-100 hover:bg-blue-200">
+            Установить Domain=.<%= host %>
+          </button>
+        </div>
+        <div class="relative">
+          <button data-action="wrong-domain" class="action-btn bg-red-100 hover:bg-red-200">
+            Попытка Domain=<%= subdomain %>
+          </button>
+        </div>
+        <div class="relative">
+          <button data-action="samesite-none" class="action-btn bg-purple-100 hover:bg-purple-200">
+            SameSite=None + Secure (требуется https)
+          </button>
+        </div>
+        <div class="relative">
+          <button data-action="path-example" class="action-btn bg-yellow-100 hover:bg-yellow-200">
+            Path=/examples
+          </button>
+        </div>
+        <div class="relative">
+          <button data-action="delete" class="action-btn bg-gray-100 hover:bg-gray-200">
+            Удалить все тестовые
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Таблица с метаданными -->
+    <div class="bg-white rounded-lg p-6 shadow-md">
+      <h2 class="text-xl font-semibold mb-4 flex items-center space-x-2">
+        <i class="fas fa-table text-orange-500"></i>
+        <span>Метаданные Cookies</span>
+      </h2>
+      <div class="overflow-x-auto">
+        <table class="w-full border border-gray-300">
+          <thead class="bg-gray-50">
+            <tr>
+              <th class="text-left p-3 border">Имя</th>
+              <th class="text-left p-3 border">Значение</th>
+              <th class="text-left p-3 border">Domain</th>
+              <th class="text-left p-3 border">Path</th>
+              <th class="text-left p-3 border">Secure</th>
+              <th class="text-left p-3 border">SameSite</th>
+            </tr>
+          </thead>
+          <tbody id="cookiesMetadata"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Справочная информация -->
+    <div class="bg-white rounded-lg p-6 shadow-md">
+      <h2 class="text-xl font-semibold mb-4 flex items-center space-x-2">
+        <i class="fas fa-book text-purple-500"></i>
+        <span>Справочная информация</span>
+      </h2>
+      <div class="space-y-4">
+        <div class="info-card bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+          <h3 class="font-semibold flex items-center space-x-2 mb-2"><i class="fas fa-network-wired"></i> Domain</h3>
+          <p>Если не указан – cookie привязывается только к текущему домену (host-only). Для обеспечения работы на
+            поддоменах используйте значение, например, <code>.<%= host %></code>.</p>
+        </div>
+        <div class="info-card bg-green-50 p-4 rounded-lg border-l-4 border-green-400">
+          <h3 class="font-semibold flex items-center space-x-2 mb-2"><i class="fas fa-route"></i> Path</h3>
+          <p>Определяет, по какому пути cookie будет отправляться. По умолчанию – <code>/</code>.</p>
+        </div>
+        <div class="info-card bg-red-50 p-4 rounded-lg border-l-4 border-red-400">
+          <h3 class="font-semibold flex items-center space-x-2 mb-2"><i class="fas fa-shield-alt"></i> Secure</h3>
+          <p>Cookie с этим атрибутом передается только через HTTPS. Для использования SameSite=None атрибут Secure
+            обязателен.</p>
+        </div>
+        <div class="info-card bg-purple-50 p-4 rounded-lg border-l-4 border-purple-400">
+          <h3 class="font-semibold flex items-center space-x-2 mb-2"><i class="fas fa-exchange-alt"></i> SameSite</h3>
+          <p>Значение по умолчанию – Lax, которое ограничивает передачу cookie при кросс-доменных запросах. Strict –
+            cookie передаётся только в том же контексте, None – передаётся всегда (но требует Secure).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Контейнер для уведомлений -->
+  <div id="notifications" class="fixed bottom-4 right-4 space-y-2 w-72"></div>
+
+  <script>
+    const host = '<%= host %>';
+    const subdomain = '<%= subdomain %>';
+
+    // Карта настроек для cookie. Для каждого действия задаем явно передаваемые параметры.
+    const COOKIE_MAP = {
+      hostOnly: { name: 'host_only', domain: null, path: '/' },
+      domain: { name: 'domain_cookie', domain: `.${host}`, path: '/' },
+      'wrong-domain': { name: 'wrong_domain', domain: subdomain, path: '/' },
+      'samesite-none': { name: 'samesite_none', domain: null, path: '/', sameSite: 'None', secure: true },
+      'path-example': { name: 'path_example', domain: null, path: '/examples' }
+    };
+
+    document.querySelectorAll('[data-action]').forEach(btn => {
+      const action = btn.dataset.action;
+      if (action === 'delete') return;
+
+      const config = COOKIE_MAP[action];
+      const tooltip = document.createElement('div');
+      tooltip.className = 'tooltip';
+
+      const params = [
+        `Name: ${config.name}`,
+        `Domain: ${config.domain || '(host-only)'}`,
+        `Path: ${config.path}`,
+        `Secure: ${config.secure ? '✓ Yes' : '✗ No'}`,
+        `SameSite: ${config.sameSite || 'Lax'}`
+      ];
+
+      tooltip.innerHTML = params.join('<br>');
+      btn.parentElement.appendChild(tooltip);
+    });
+
+    // Инициализация: вывод текущего хоста
+    document.getElementById('currentHost').textContent = location.hostname;
+    document.getElementById('currentPath').textContent = location.pathname;
+    updateDisplay();
+
+    // Назначение обработчиков для кнопок по data-action.
+    document.querySelectorAll('[data-action]').forEach(btn => {
+      btn.addEventListener('click', handleAction);
+    });
+
+    function handleAction(e) {
+      const action = e.target.dataset.action;
+      if (action === 'delete') {
+        deleteCookies();
+      } else {
+        setCookie(action);
+      }
+      // Обновляем отображение после выполнения действия
+      updateDisplay();
+    }
+
+    // Функция установки cookie по заданному действию (ключу карты COOKIE_MAP)
+    function setCookie(action) {
+      const config = COOKIE_MAP[action];
+      // Формируем строку cookie с переданными параметрами.
+      let cookieStr = `${config.name}=${Date.now()};`;
+      if (config.domain) cookieStr += ` Domain=${config.domain};`;
+      if (config.path) cookieStr += ` Path=${config.path};`;
+      if (config.secure) cookieStr += ' Secure;';
+      if (config.sameSite) cookieStr += ` SameSite=${config.sameSite};`;
+
+      document.cookie = cookieStr;
+
+      // Немного задержки для проверки успешной установки cookie
+      setTimeout(() => {
+        const success = document.cookie.includes(config.name);
+        showNotification(
+          success ? `Cookie "${config.name}" успешно установлена` : `В текущем контексте "${config.name}" не в наличии (или вовсе не установлена)`,
+          success ? 'success' : 'error'
+        );
+      }, 100);
+    }
+
+    // Функция удаления всех тестовых cookie
+    function deleteCookies() {
+      const expired = new Date(0);
+      Object.values(COOKIE_MAP).forEach(cookie => {
+        document.cookie = [
+          `${cookie.name}=`,
+          cookie.path ? `Path=${cookie.path}` : '',
+          cookie.domain ? `Domain=${cookie.domain}` : '',
+          `Expires=${expired.toUTCString()}`
+        ].filter(Boolean).join('; ');
+      });
+      showNotification('Все тестовые cookies удалены', 'success');
+    }
+
+    // Функция обновления отображения: вывод raw строки cookie и метаданных
+    function updateDisplay() {
+      // Отобразить document.cookie
+      document.getElementById('cookiesRaw').textContent = document.cookie || 'Нет cookies';
+      // Обновить таблицу метаданных
+      const cookies = parseCookies();
+      const tbody = document.getElementById('cookiesMetadata');
+      tbody.innerHTML = cookies.map(cookie => `
+        <tr class="border-t">
+          <td class="p-3 font-mono">${cookie.name}</td>
+          <td class="p-3 font-mono">${cookie.value}</td>
+          <td class="p-3">${cookie.domain || location.hostname}</td>
+          <td class="p-3">${cookie.path || '/'}</td>
+          <td class="p-3">${cookie.secure ? '✓' : '✗'}</td>
+          <td class="p-3">${cookie.sameSite || 'Lax'}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Функция для парсинга document.cookie в массив объектов с полями name и value
+    function parseCookies() {
+      if (!document.cookie) return [];
+      return document.cookie.split(';').map(c => {
+        const [name, ...rest] = c.trim().split('=');
+        return { name, value: rest.join('=') };
+      });
+    }
+
+    // Функция для показа уведомлений в нижнем правом углу
+    function showNotification(text, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `p-3 rounded-lg ${{
+        success: 'bg-green-100 text-green-800',
+        error: 'bg-red-100 text-red-800',
+        info: 'bg-blue-100 text-blue-800'
+      }[type]}`;
+      notification.innerHTML = `
+        <div class="flex items-center space-x-2">
+          <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
+          <span>${text}</span>
+        </div>
+      `;
+      const container = document.getElementById('notifications');
+      container.appendChild(notification);
+      setTimeout(() => notification.remove(), 3000);
+    }
+
+    document.title = location.protocol + '//' + location.hostname + location.pathname;
+  </script>
+
+  <!-- Дополнительное оформление через Tailwind CSS с использованием @apply (если настроен PostCSS) -->
+  <style>
+    .action-btn {
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      transition: all 200ms;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      width: 100%;
+    }
+
+    .info-card h3 {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .tooltip {
+      display: none;
+      position: absolute;
+      z-index: 50;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      margin-bottom: 0.5rem;
+      background: #1F2937;
+      color: white;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+      white-space: pre-line;
+      box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      transition: opacity 200ms;
+    }
+
+    .tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border-width: 6px;
+      border-style: solid;
+      border-color: #1F2937 transparent transparent transparent;
+    }
+
+    .relative:hover .tooltip {
+      display: block;
+    }
+  </style>
+</body>
+
+</html>

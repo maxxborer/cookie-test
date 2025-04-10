@@ -1,0 +1,30 @@
+{
+  "name": "cookie-test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@gitlab.ksdev.kz:bureev_ks520/cookie-test.git",
+  "author": "Maksim Bureev <Maksim.Bureev@kaspi.kz>",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "yarn && nodemon --exec ts-node src/index.ts"
+  },
+  "dependencies": {
+    "dotenv": "16.4.7",
+    "ejs": "3.1.10",
+    "express": "5.1.0",
+    "serve-favicon": "^2.5.0",
+    "vhost": "3.0.2"
+  },
+  "devDependencies": {
+    "@types/ejs": "3.1.5",
+    "@types/express": "5.0.1",
+    "@types/node": "22.14.0",
+    "@types/serve-favicon": "^2.5.7",
+    "@types/vhost": "3.0.9",
+    "nodemon": "3.1.9",
+    "ts-node": "10.9.2",
+    "typescript": "5.8.3"
+  }
+}
