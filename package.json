@@ -1,0 +1,32 @@
+{
+  "name": "cookie-test",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "author": "Maxim Bureev <maxxborer@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "yarn && nodemon --exec ts-node src/index.ts",
+    "build": "tsc && node scripts/build.js",
+    "preview": "yarn && yarn build && node dist/index.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "dotenv": "16.4.7",
+    "ejs": "3.1.10",
+    "express": "5.1.0",
+    "serve-favicon": "^2.5.0",
+    "vhost": "3.0.2"
+  },
+  "devDependencies": {
+    "@types/ejs": "3.1.5",
+    "@types/express": "5.0.1",
+    "@types/node": "22.14.0",
+    "@types/serve-favicon": "^2.5.7",
+    "@types/vhost": "3.0.9",
+    "nodemon": "3.1.9",
+    "ts-node": "10.9.2",
+    "typescript": "5.8.3"
+  }
+}

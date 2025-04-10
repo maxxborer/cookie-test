@@ -1,0 +1,25 @@
+.DS_Store
+node_modules
+
+.cache
+/dist
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor directories and files
+.idea
+.vscode/settings.json
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+**/*.tsbuildinfo
+
+.env
+.vercel
+.env*.local
